@@ -1,0 +1,7 @@
+[user]
+	name = Viktor Yanakov
+	email = viktor.yanakov@gmail.com
+[core]
+	pager = cat
+[init]
+	defaultBranch = main
