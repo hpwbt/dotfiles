@@ -122,8 +122,9 @@ window_rules:
       - window_process: { equals: 'GHelper' }
       - window_process: { equals: 'Mullvad VPN' }
       - window_process: { equals: 'LibreWolf-WinUpdater'}
-
       - window_process: { equals: 'Overwatch'}
+      - window_process: { equals: 'Fallout4'}
+      - window_process: { equals: 'Fallout4Launcher'}
   - commands: ['set-floating']
     match:
       - window_process: { equals: 'mpv'}
