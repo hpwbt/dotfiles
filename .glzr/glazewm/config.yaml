@@ -95,7 +95,7 @@ window_behavior:
       centered: false 
 
       # Whether to show floating windows as always on top.
-      shown_on_top: true 
+      shown_on_top: false 
 
     fullscreen:
       # Maximize the window if possible. If the window doesn't have a
@@ -119,12 +119,18 @@ workspaces:
 window_rules:
   - commands: ['ignore']
     match:
+      # Ignores various programs. 
       - window_process: { equals: 'GHelper' }
       - window_process: { equals: 'Mullvad VPN' }
       - window_process: { equals: 'LibreWolf-WinUpdater'}
-      - window_process: { equals: 'Overwatch'}
+      - window_process: { equals: 'ModOrganizer'}
+      - window_process: { equals: 'Bethini'}
+      - window_process: { equals: 'xFOEdit'}
+
+      # Ignores various games.
       - window_process: { equals: 'Fallout4'}
       - window_process: { equals: 'Fallout4Launcher'}
+      - window_process: { equals: 'Overwatch'}
   - commands: ['set-floating']
     match:
       - window_process: { equals: 'mpv'}
