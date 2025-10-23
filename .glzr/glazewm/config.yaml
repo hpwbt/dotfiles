@@ -133,6 +133,7 @@ window_rules:
       - window_process: { equals: 'Overwatch'}
   - commands: ['set-floating']
     match:
+      # Sets various programs to float.
       - window_process: { equals: 'mpv'}
 
 keybindings:
