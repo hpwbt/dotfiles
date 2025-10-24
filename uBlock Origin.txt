@@ -1,0 +1,36 @@
+{
+  "timeStamp": 1761333327093,
+  "version": "1.67.0",
+  "userSettings": {
+    "contextMenuEnabled": false,
+    "importedLists": []
+  },
+  "selectedFilterLists": [
+    "user-filters",
+    "ublock-filters",
+    "ublock-badware",
+    "ublock-privacy",
+    "ublock-quick-fixes",
+    "ublock-unbreak",
+    "easylist",
+    "easyprivacy",
+    "LegitimateURLShortener",
+    "adguard-spyware-url",
+    "urlhaus-1",
+    "curben-phishing",
+    "plowe-0",
+    "fanboy-cookiemonster",
+    "ublock-cookies-easylist",
+    "adguard-cookies",
+    "ublock-cookies-adguard"
+  ],
+  "hiddenSettings": {},
+  "whitelist": [
+    "chrome-extension-scheme",
+    "moz-extension-scheme"
+  ],
+  "dynamicFilteringString": "behind-the-scene * * noop\nbehind-the-scene * inline-script noop\nbehind-the-scene * 1p-script noop\nbehind-the-scene * 3p-script noop\nbehind-the-scene * 3p-frame noop\nbehind-the-scene * image noop\nbehind-the-scene * 3p noop",
+  "urlFilteringString": "",
+  "hostnameSwitchesString": "no-large-media: behind-the-scene false\nno-csp-reports: * true",
+  "userFilters": "! Blocks sign in popups from Google.\n||accounts.google.com/gsi/iframe/select?client_id=*.apps.googleusercontent.com\n\n! Blocks promotional and support banners in MangaDex.\n||mangadex.org/promo/\n||mangadex.org/img/support-us-1.png$image\nmangadex.org##.z-20.drop-shadow.justify-center.flex.mb-6.bottom-0.right-0.left-0.fixed\nmangadex.org##.animation-shine.glow.frosted.primary.overflow-hidden.px-3.items-center.flex.md-btn.relative.custom-opacity.rounded.drop-shadow.rounded-lg.md\\:flex-grow\n\n\n! Blocks promotional banners in Google Photos.\nphotos.google.com##.LJzzuc\n\n! Blocks Instagram's home page.\nwww.instagram.com##.xw7yly9 > .x1yztbdb\nwww.instagram.com##.x6bx242.x7vhb2i.x13vifvy.x1dr59a3\nwww.instagram.com##.x1nhvcw1.x1oa3qoh.x6s0dn4.xqjyukv.xdt5ytf.x2lah0s.x1c4vz4f.xryxfnj.x1plvlek.x1uhb9sk.xbiv7yw.x16uus16.x1ga7v0g.x15mokao.x78zum5.xjbqb8w.x9f619.x1c1uobl.x18d9i69.xyri2b.xexx8yu.x1lziwak.xat24cr.x14z9mp.xdj266r.html-div\n\n! Disables ambient mode on YouTube.\nwww.youtube.com###cinematics :empty"
+}
