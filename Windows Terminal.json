@@ -1,0 +1,106 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": 
+    [
+        {
+            "command": 
+            {
+                "action": "prevTab"
+            },
+            "id": "User.PrevTab"
+        },
+        {
+            "command": "duplicateTab",
+            "id": "User.DuplicateTab"
+        },
+        {
+            "command": 
+            {
+                "action": "nextTab"
+            },
+            "id": "User.NextTab"
+        },
+        {
+            "command": 
+            {
+                "action": "closeTab"
+            },
+            "id": "User.CloseTab"
+        }
+    ],
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+    "keybindings": 
+    [
+        {
+            "id": "User.DuplicateTab",
+            "keys": "ctrl+t"
+        },
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "User.CloseTab",
+            "keys": "ctrl+w"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "User.NextTab",
+            "keys": "ctrl+shift+l"
+        },
+        {
+            "id": "User.PrevTab",
+            "keys": "ctrl+shift+h"
+        }
+    ],
+    "newTabMenu": [],
+    "profiles": 
+    {
+        "defaults": 
+        {
+            "colorScheme": "Default Light Modern"
+        },
+        "list": 
+        [
+            {
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "name": "Windows PowerShell"
+            }
+        ]
+    },
+    "schemes": 
+    [
+        {
+            "background": "#FFFFFF",
+            "black": "#000000",
+            "blue": "#0451A5",
+            "brightBlack": "#666666",
+            "brightBlue": "#0451A5",
+            "brightCyan": "#0598BC",
+            "brightGreen": "#14CE14",
+            "brightPurple": "#BC05BC",
+            "brightRed": "#CD3131",
+            "brightWhite": "#A5A5A5",
+            "brightYellow": "#B5BA00",
+            "cursorColor": "#000000",
+            "cyan": "#0598BC",
+            "foreground": "#3B3B3B",
+            "green": "#107C10",
+            "name": "Default Light Modern",
+            "purple": "#BC05BC",
+            "red": "#CD3131",
+            "selectionBackground": "#ADD6FF",
+            "white": "#555555",
+            "yellow": "#949800"
+        }
+    ],
+    "tabSwitcherMode": "disabled",
+    "theme": "system",
+    "themes": []
+}
