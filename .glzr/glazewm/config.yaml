@@ -131,9 +131,10 @@ window_rules:
       - window_process: { equals: 'Fallout4'}
       - window_process: { equals: 'Fallout4Launcher'}
       - window_process: { equals: 'Overwatch'}
+
   - commands: ['set-floating']
     match:
-      # Sets various programs to float.
+      # Sets various programs to floating mode.
       - window_process: { equals: 'mpv'}
 
 keybindings:

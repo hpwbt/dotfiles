@@ -1,7 +1,7 @@
 {
 	"name": "Vimium C",
-	"@time": "24/10/2025, 21:15:16",
-	"time": 1761333316663,
+	"@time": "26/10/2025, 7:55:26 pm",
+	"time": 1761504926256,
 	"environment": {
 		"extension": "2.12.3",
 		"platform": "win",
@@ -47,7 +47,7 @@
 	"preferBrowserSearch": false,
 	"previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<",
 	"searchEngines": "#",
-	"searchUrl": "https://duckduckgo.com/?q=$s DuckDuckGo",
+	"searchUrl": "https://www.startpage.com/sp/search?query=$s Startpage",
 	"showActionIcon": false,
 	"titleIgnoreList": "#",
 	"userDefinedCss": [
