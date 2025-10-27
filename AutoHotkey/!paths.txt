@@ -1,1 +1,1 @@
-C:\Users\hpwbt\Documents\AutoHotkey\Scripts\Shortcut Manager.ahk
+C:\Users\hpwbt\Documents\AutoHotkey\Shortcut Manager.ahk
