@@ -102,5 +102,6 @@
     ],
     "tabSwitcherMode": "disabled",
     "theme": "system",
-    "themes": []
+    "themes": [],
+    "warning.confirmCloseAllTabs": false
 }
