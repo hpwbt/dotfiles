@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\image]
+"Treatment"=dword:00000000
+[HKEY_CLASSES_ROOT\SystemFileAssociations\video]
+"Treatment"=dword:00000000
