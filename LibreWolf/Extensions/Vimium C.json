@@ -1,7 +1,7 @@
 {
 	"name": "Vimium C",
-	"@time": "26/10/2025, 7:55:26 pm",
-	"time": 1761504926256,
+	"@time": "29/10/2025, 2:46:50 am",
+	"time": 1761702410652,
 	"environment": {
 		"extension": "2.12.3",
 		"platform": "win",
@@ -47,7 +47,7 @@
 	"preferBrowserSearch": false,
 	"previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<",
 	"searchEngines": "#",
-	"searchUrl": "https://www.startpage.com/sp/search?query=$s Startpage",
+	"searchUrl": "about:blank",
 	"showActionIcon": false,
 	"titleIgnoreList": "#",
 	"userDefinedCss": [
