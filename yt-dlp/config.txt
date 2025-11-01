@@ -1,3 +1,4 @@
 ﻿--output ~/Downloads/%(upload_date)s.%(ext)s
+--cookies cookies.txt
 --no-cache-dir
 --no-playlist

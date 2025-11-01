@@ -126,8 +126,6 @@ window_rules:
       - window_process: { equals: 'ModOrganizer'}
       - window_process: { equals: 'Bethini'}
       - window_process: { equals: 'xFOEdit'}
-
-      # Ignores various games.
       - window_process: { equals: 'Fallout4'}
       - window_process: { equals: 'Fallout4Launcher'}
       - window_process: { equals: 'Overwatch'}
