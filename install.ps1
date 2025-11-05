@@ -8,62 +8,64 @@ $ErrorActionPreference = "Stop"
 # Initialize derived environment variables.
 Initialize-Env
 
-# Pin the repo root to this script’s folder.
+# Load and flatten the map.
 $root = $PSScriptRoot
+$map  = Get-Content (Join-Path $root 'map.json') -Raw | ConvertFrom-Json
+$plan = Build-Plan $map $root
 
-# Load map once.
-$map = Get-Content (Join-Path $root "map.json") -Raw | ConvertFrom-Json
-
-# Install one file live.
-function Install-File($liveSpec,$backupRel) {
-  $live  = Resolve-EnvRefs $liveSpec
-  $src   = Resolve-RepoPath $root $backupRel
-  Write-Host "File: $backupRel"
-  Write-Host "  Copy to $live"
-  New-Item -ItemType Directory -Force -Path (Split-Path $live) | Out-Null
-  Copy-Item $src $live -Force
+# Copy one file with parent creation.
+function Put-File([string]$src,[string]$dst) {
+  # Ensure parent directory exists.
+  New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
+  # Copy the file over the target.
+  Copy-Item $src $dst -Force
 }
 
-# Install one dir live.
-function Install-Dir($liveSpec,$backupRel) {
-  $live  = Resolve-EnvRefs $liveSpec
-  $src   = Resolve-RepoPath $root $backupRel
-  Write-Host "Dir:  $backupRel"
-  Write-Host "  Replace $live"
-  if (Test-Path $live) { Remove-Item $live -Recurse -Force }
-  New-Item -ItemType Directory -Force -Path (Split-Path $live) | Out-Null
-  Copy-Item $src $live -Recurse -Force
+# Replace one directory with repo snapshot.
+function Put-Dir([string]$src,[string]$dst) {
+  # Remove old directory to avoid stale files.
+  if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
+  # Ensure parent directory exists.
+  New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
+  # Copy the snapshot recursively.
+  Copy-Item $src $dst -Recurse -Force
 }
 
-# Import one reg file.
-function Install-Reg($backupRel) {
-  $src = Resolve-RepoPath $root $backupRel
-  Write-Host "Reg:  $backupRel"
-  Write-Host "  Import"
-  Start-Process reg.exe -ArgumentList @("import","`"$src`"") -Verb RunAs -Wait
+# Import one .reg file as administrator.
+function Import-Reg([string]$regPath) {
+  # Delegate to reg.exe with elevation.
+  Start-Process reg.exe -ArgumentList @("import","`"$regPath`"") -Verb RunAs -Wait
 }
 
-# Execute each program section.
-foreach ($app in $map.PSObject.Properties) {
-  Write-Host "== $($app.Name) =="
+# Execute the plan grouped by program for readable logs.
+foreach ($group in $plan | Group-Object App) {
+  Write-Host "== $($group.Name) =="
 
-  foreach ($m in ($app.Value.files | ForEach-Object { $_ })) {
-    Install-File $m.live $m.backup
-  }
-
-  foreach ($m in ($app.Value.dirs | ForEach-Object { $_ })) {
-    Install-Dir $m.live $m.backup
-  }
-
-  foreach ($rel in ($app.Value.reg | ForEach-Object { $_ })) {
-    Install-Reg $rel
-  }
-
-  foreach ($item in ($app.Value.manual | ForEach-Object { $_ })) {
-    Write-Host "Manual: $item"
+  foreach ($it in $group.Group) {
+    switch ($it.Kind) {
+      'file' {
+        Write-Host ("  File: {0}" -f $it.Label)
+        Write-Host ("    Copy to {0}." -f $it.LivePath)
+        Put-File $it.RepoPath $it.LivePath
+      }
+      'dir'  {
+        Write-Host ("  Dir:  {0}" -f $it.Label)
+        Write-Host ("    Replace {0}." -f $it.LivePath)
+        Put-Dir $it.RepoPath $it.LivePath
+      }
+      'reg'  {
+        Write-Host ("  Reg:  {0}" -f $it.Label)
+        Write-Host ("    Import.")
+        Import-Reg $it.RepoPath
+      }
+      'manual' {
+        Write-Host ("  Manual: {0}. Action required." -f $it.Label)
+      }
+    }
   }
 
   Write-Host
 }
 
-Write-Host "Done."
+# Finish with a clear status line.
+Write-Host "Install complete."

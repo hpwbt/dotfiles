@@ -8,72 +8,37 @@ $ErrorActionPreference = "Stop"
 # Initialize derived environment variables.
 Initialize-Env
 
-# Pin the repo root to this script’s folder.
+# Load and flatten the map.
 $root = $PSScriptRoot
-
-# Load the mapping file once.
 $map  = Get-Content (Join-Path $root 'map.json') -Raw | ConvertFrom-Json
+$plan = Build-Plan $map $root | Test-Plan
 
-# Track missing items for exit code.
-$miss = 0
-
-# Emit a simple exists/missing sentence.
-function Say([string]$prefix, [bool]$ok) {
-  if ($ok) { Write-Host ("    {0}: Exists." -f $prefix) }
-  else { $global:miss++; Write-Host ("    {0}: Missing." -f $prefix) }
-}
-
-# Walk each program section and describe status per item.
-foreach ($app in $map.PSObject.Properties) {
-  $name = $app.Name
-  $val  = $app.Value
-  Write-Host "== $name =="
-
-  # Report files with live and backup status.
-  foreach ($m in ($val.files | ForEach-Object { $_ })) {
-    $livePath = Resolve-EnvRefs $m.live
-    $bakPath  = Resolve-RepoPath $root $m.backup
-    $liveOk = if ($livePath) { Test-Path $livePath -PathType Leaf } else { $false }
-    $bakOk  = if ($bakPath)  { Test-Path $bakPath  -PathType Leaf } else { $false }
-    Write-Host ("  File: {0}" -f $m.backup)
-    Say "Live" $liveOk
-    Say "Backup" $bakOk
-    if ($livePath) { Write-Host ("    Live path: {0}" -f $livePath) }
+# Group output per program and state facts.
+foreach ($group in $plan | Group-Object App) {
+  Write-Host "== $($group.Name) =="
+  foreach ($it in $group.Group) {
+    switch ($it.Kind) {
+      'file' { Write-Host ("  File: {0}" -f $it.Label)
+               Write-Host ("    Live:   {0}." -f ($(if ($it.LiveOk) {'Exists'} else {'Missing'})))
+               Write-Host ("    Backup: {0}." -f ($(if ($it.RepoOk) {'Exists'} else {'Missing'})))
+               if ($it.LivePath) { Write-Host ("    Live path: {0}" -f $it.LivePath) } }
+      'dir'  { Write-Host ("  Dir:  {0}" -f $it.Label)
+               Write-Host ("    Live:   {0}." -f ($(if ($it.LiveOk) {'Exists'} else {'Missing'})))
+               Write-Host ("    Backup: {0}." -f ($(if ($it.RepoOk) {'Exists'} else {'Missing'})))
+               if ($it.LivePath) { Write-Host ("    Live path: {0}" -f $it.LivePath) } }
+      'reg'  { Write-Host ("  Reg:  {0}" -f $it.Label)
+               Write-Host ("    Backup: {0}." -f ($(if ($it.RepoOk) {'Exists'} else {'Missing'}))) }
+      'manual' { Write-Host ("  Manual: {0}. Action required." -f $it.Label) }
+    }
   }
-
-  # Report directories with live and backup status.
-  foreach ($m in ($val.dirs | ForEach-Object { $_ })) {
-    $livePath = Resolve-EnvRefs $m.live
-    $bakPath  = Resolve-RepoPath $root $m.backup
-    $liveOk = if ($livePath) { Test-Path $livePath -PathType Container } else { $false }
-    $bakOk  = if ($bakPath)  { Test-Path $bakPath  -PathType Container } else { $false }
-    Write-Host ("  Dir:  {0}" -f $m.backup)
-    Say "Live" $liveOk
-    Say "Backup" $bakOk
-    if ($livePath) { Write-Host ("    Live path: {0}" -f $livePath) }
-  }
-
-  # Report registry assets from repo only.
-  foreach ($rel in ($val.reg | ForEach-Object { $_ })) {
-    $bakPath = Resolve-RepoPath $root $rel
-    $bakOk   = if ($bakPath) { Test-Path $bakPath -PathType Leaf } else { $false }
-    Write-Host ("  Reg:  {0}" -f $rel)
-    Say "Backup" $bakOk
-  }
-
-  # List manual items that need human action.
-  foreach ($item in ($val.manual | ForEach-Object { $_ })) {
-    Write-Host ("  Manual: {0}. Action required." -f $item)
-  }
-
   Write-Host
 }
 
-# Exit with nonzero code if anything is missing.
-if ($miss -gt 0) {
-  Write-Host ("Summary: {0} missing item(s)." -f $miss)
-  exit 2
-} else {
-  Write-Host "Summary: all present."
-  exit 0
-}
+# Compute exit code from missing items.
+$missing = @(
+  $plan | Where-Object { $_.Kind -in 'file','dir' -and ($_.LiveOk -eq $false -or $_.RepoOk -eq $false) }
+  $plan | Where-Object { $_.Kind -eq 'reg' -and ($_.RepoOk -eq $false) }
+).Count
+
+if ($missing -gt 0) { Write-Host ("Summary: {0} missing item(s)." -f $missing); exit 2 }
+else { Write-Host "Summary: all present."; exit 0 }
