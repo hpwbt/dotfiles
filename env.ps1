@@ -23,8 +23,10 @@ function Get-LibreWolfProfilePath {
   if (-not (Test-Path $ini -PathType Leaf)) { return $null }
   $content  = Get-Content -Raw $ini -Encoding UTF8
   $sections = ($content -split '\r?\n\r?\n') | Where-Object { $_ -match '^\[Profile' }
-  $pick     = ($sections | Where-Object { $_ -match '^Default=1' } | Select-Object -First 1) `
-              ?? ($sections | Select-Object -First 1)
+  $pick = $sections | Where-Object { $_ -match '^Default=1' } | Select-Object -First 1
+  if (-not $pick) {
+    $pick = $sections | Select-Object -First 1
+  }
   if (-not $pick) { return $null }
   $pathLine = ($pick -split '\r?\n') | Where-Object { $_ -like 'Path=*' } | Select-Object -First 1
   if (-not $pathLine) { return $null }
