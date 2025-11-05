@@ -137,7 +137,6 @@ window_rules:
       - window_process: { equals: 'Bethini'}
       - window_process: { equals: 'xFOEdit'}
       - window_process: { equals: 'VirtualBox'}
-      - window_process: { equals: 'VirtualBoxVM'}
 
 keybindings:
   # Shift focus in a given direction.
