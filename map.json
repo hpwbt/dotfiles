@@ -17,7 +17,7 @@
   },
   "GHelper": {
     "files": [
-      { "live": "$env:APPDATA/GHelper/config.json", "backup": "Ghelper/config.json" }
+      { "live": "$env:APPDATA/GHelper/config.json", "backup": "GHelper/config.json" }
     ]
   },
   "Git": {
@@ -54,29 +54,29 @@
   },
   "Windows PowerShell": {
     "files": [
-      { "live": "$env:USERPROFILE/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1", "backup": "Windows PowerShell/Microsoft.PowerShell_profile.ps1" }
+      { "live": "$env:USERPROFILE/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1", "backup": "WindowsPowerShell/Microsoft.PowerShell_profile.ps1" }
     ]
   },
   "Windows Registry": {
-      "registry": [
-        "Automatically Close all Background Apps on Shutdown.reg",
-        "Disable GameDVR.reg",
-        "Disable Online Tips in the Settings.reg",
-        "Disable the Lock Screen.reg",
-        "Disable Web Search in the Start Menu.reg",
-        "Give IPv4 precednece over IPv6.reg",
-        "Prevent Diagnostic Data from Being Sent.reg",
-        "Prevent Downloaded Files from Being Blocked.reg",
-        "Prevent Microsoft Edge from Running in the Background.reg",
-        "Prevent UWP Apps from Running in the Background.reg",
-        "Prevent Windows from Reducing Wallpaper Quality.reg",
-        "Prevent Windows Update from Installing Drivers.reg",
-        "Remove the Home Section in the Settings.reg",
-        "Remove the Home and Gallery Sections in Windows Explorer.reg",
-        "Remove the Recommended Section in the Start Menu.reg",
-        "Remove Thumbnail Overlays in Windows Explorer.reg",
-        "Set the Full Right-Click Menu as the Default.reg"
-      ]
+    "registry": [
+      "Automatically Close all Background Apps on Shutdown.reg",
+      "Disable GameDVR.reg",
+      "Disable Online Tips in the Settings.reg",
+      "Disable the Lock Screen.reg",
+      "Disable Web Search in the Start Menu.reg",
+      "Give IPv4 precednece over IPv6.reg",
+      "Prevent Diagnostic Data from Being Sent.reg",
+      "Prevent Downloaded Files from Being Blocked.reg",
+      "Prevent Microsoft Edge from Running in the Background.reg",
+      "Prevent UWP Apps from Running in the Background.reg",
+      "Prevent Windows from Reducing Wallpaper Quality.reg",
+      "Prevent Windows Update from Installing Drivers.reg",
+      "Remove the Home Section in the Settings.reg",
+      "Remove the Home and Gallery Sections in Windows Explorer.reg",
+      "Remove the Recommended Section in the Start Menu.reg",
+      "Remove Thumbnail Overlays in Windows Explorer.reg",
+      "Set the Full Right-Click Menu as the Default.reg"
+    ]
   },
   "Windows Terminal": {
     "files": [
@@ -85,7 +85,7 @@
   },
   "WSL": {
     "files": [
-      { "live": "$env:USERPROFILE/.wslgconfig", "backup": "WSL/.wlsgconfig" }
+      { "live": "$env:USERPROFILE/.wslgconfig", "backup": "WSL/.wslgconfig" }
     ]
   },
   "yt-dlp": {
