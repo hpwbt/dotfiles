@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # Load shared helpers.
-. "$PSScriptRoot\lib.ps1"
+. "$PSScriptRoot\env.ps1"
 
 # Initialize derived environment variables.
 Initialize-Env
@@ -12,7 +12,7 @@ Initialize-Env
 $root = $PSScriptRoot
 
 # Load the mapping file once.
-$map  = Get-Content (Join-Path $root '_map.json') -Raw | ConvertFrom-Json
+$map  = Get-Content (Join-Path $root 'map.json') -Raw | ConvertFrom-Json
 
 # Track missing items for exit code.
 $miss = 0

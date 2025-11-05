@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # Load shared helpers.
-. "$PSScriptRoot\lib.ps1"
+. "$PSScriptRoot\env.ps1"
 
 # Initialize derived environment variables.
 Initialize-Env
