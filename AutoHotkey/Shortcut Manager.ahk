@@ -6,7 +6,6 @@
 
 ; If LibreWolf is focused.
 #HotIf WinActive("ahk_exe librewolf.exe")
-
     ; Enable ergonomic tab navigation.
     ^+l:: Send("^{Tab}")
     ^+h:: Send("^+{Tab}")
@@ -18,7 +17,6 @@
 
 ; If Obsidian is focused.
 #HotIf WinActive("ahk_exe Obsidian.exe")
-
     ; Remap "Ctrl+[" to a double "Esc".
     ; Needed to escape Wikilinks.
     ^[:: Send("{Esc 2}")

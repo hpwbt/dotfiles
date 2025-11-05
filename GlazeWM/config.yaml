@@ -122,18 +122,22 @@ window_rules:
       # Ignores various programs. 
       - window_process: { equals: 'GHelper' }
       - window_process: { equals: 'Mullvad VPN' }
-      - window_process: { equals: 'LibreWolf-WinUpdater'}
-      - window_process: { equals: 'ModOrganizer'}
-      - window_process: { equals: 'Bethini'}
-      - window_process: { equals: 'xFOEdit'}
       - window_process: { equals: 'Fallout4'}
       - window_process: { equals: 'Fallout4Launcher'}
       - window_process: { equals: 'Overwatch'}
+      - window_process: { equals: 'javaw'}
 
   - commands: ['set-floating']
     match:
       # Sets various programs to floating mode.
+      - window_process: { equals: 'LibreWolf-WinUpdater'}
       - window_process: { equals: 'mpv'}
+      - window_process: { equals: 'prismlauncher'}
+      - window_process: { equals: 'ModOrganizer'}
+      - window_process: { equals: 'Bethini'}
+      - window_process: { equals: 'xFOEdit'}
+      - window_process: { equals: 'VirtualBox'}
+      - window_process: { equals: 'VirtualBoxVM'}
 
 keybindings:
   # Shift focus in a given direction.
