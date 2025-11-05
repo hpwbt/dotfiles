@@ -8,21 +8,33 @@ $ErrorActionPreference = "Stop"
 # Initialize derived environment variables.
 Initialize-Env
 
-# Load and flatten the map.
+# Pin the repo root to this script’s folder.
 $root = $PSScriptRoot
+
+# Load and flatten the map.
 $map  = Get-Content (Join-Path $root 'map.json') -Raw | ConvertFrom-Json
 $plan = Build-Plan $map $root
 
 # Copy one file with parent creation.
-function Put-File([string]$src,[string]$dst) {
+function Put-File([string]$src,[string]$dst,[string]$spec) {
+  # Skip when the destination could not be resolved.
+  if (-not (Is-Rooted $dst)) {
+    Write-Host ("    Skip. Live path unresolved from: {0}." -f $spec)
+    return
+  }
   # Ensure parent directory exists.
   New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
   # Copy the file over the target.
   Copy-Item $src $dst -Force
 }
 
-# Replace one directory with repo snapshot.
-function Put-Dir([string]$src,[string]$dst) {
+# Replace one directory with the repo snapshot.
+function Put-Dir([string]$src,[string]$dst,[string]$spec) {
+  # Skip when the destination could not be resolved.
+  if (-not (Is-Rooted $dst)) {
+    Write-Host ("    Skip. Live path unresolved from: {0}." -f $spec)
+    return
+  }
   # Remove old directory to avoid stale files.
   if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
   # Ensure parent directory exists.
@@ -45,13 +57,13 @@ foreach ($group in $plan | Group-Object App) {
     switch ($it.Kind) {
       'file' {
         Write-Host ("  File: {0}" -f $it.Label)
-        Write-Host ("    Copy to {0}." -f $it.LivePath)
-        Put-File $it.RepoPath $it.LivePath
+        Write-Host ("    Copy to {0}." -f ($(if ($it.LivePath) { $it.LivePath } else { '<unresolved>' })))
+        Put-File $it.RepoPath $it.LivePath $it.LiveSpec
       }
       'dir'  {
         Write-Host ("  Dir:  {0}" -f $it.Label)
-        Write-Host ("    Replace {0}." -f $it.LivePath)
-        Put-Dir $it.RepoPath $it.LivePath
+        Write-Host ("    Replace {0}." -f ($(if ($it.LivePath) { $it.LivePath } else { '<unresolved>' })))
+        Put-Dir $it.RepoPath $it.LivePath $it.LiveSpec
       }
       'reg'  {
         Write-Host ("  Reg:  {0}" -f $it.Label)

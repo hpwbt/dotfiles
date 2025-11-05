@@ -59,6 +59,12 @@ function Initialize-Env {
   }
 }
 
+# Check if a path is rooted and non-empty.
+function Is-Rooted([string]$p) {
+  if ([string]::IsNullOrWhiteSpace($p)) { return $false }
+  [IO.Path]::IsPathRooted($p)
+}
+
 # Flatten map.json into a sequence of actionable plan items.
 function Build-Plan([object]$map, [string]$root) {
   foreach ($app in $map.PSObject.Properties) {
@@ -71,9 +77,10 @@ function Build-Plan([object]$map, [string]$root) {
       [pscustomobject]@{
         App      = $name
         Kind     = 'file'
+        Label    = $m.backup
+        LiveSpec = $m.live
         LivePath = Resolve-EnvRefs $m.live
         RepoPath = Resolve-RepoPath $root $m.backup
-        Label    = $m.backup
       }
     }
 
@@ -83,9 +90,10 @@ function Build-Plan([object]$map, [string]$root) {
       [pscustomobject]@{
         App      = $name
         Kind     = 'dir'
+        Label    = $m.backup
+        LiveSpec = $m.live
         LivePath = Resolve-EnvRefs $m.live
         RepoPath = Resolve-RepoPath $root $m.backup
-        Label    = $m.backup
       }
     }
 
@@ -95,9 +103,10 @@ function Build-Plan([object]$map, [string]$root) {
       [pscustomobject]@{
         App      = $name
         Kind     = 'reg'
+        Label    = $rel
+        LiveSpec = $null
         LivePath = $null
         RepoPath = Resolve-RepoPath $root $rel
-        Label    = $rel
       }
     }
 
@@ -107,9 +116,10 @@ function Build-Plan([object]$map, [string]$root) {
       [pscustomobject]@{
         App      = $name
         Kind     = 'manual'
+        Label    = $item
+        LiveSpec = $null
         LivePath = $null
         RepoPath = $null
-        Label    = $item
       }
     }
   }
