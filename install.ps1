@@ -15,67 +15,64 @@ $root = $PSScriptRoot
 $map  = Get-Content (Join-Path $root 'map.json') -Raw | ConvertFrom-Json
 $plan = Build-Plan $map $root
 
-# Copy one file with parent creation.
-function Put-File([string]$src,[string]$dst,[string]$spec) {
+# Emit a normalized action line.
+function Log([string]$verb, [string]$label, [string]$extra = $null) {
+  if ($extra) { Write-Host ("  {0,-8} {1}  {2}" -f $verb, $label, $extra) }
+  else       { Write-Host ("  {0,-8} {1}"      -f $verb, $label) }
+}
+
+# Copy one file with parent creation and contextual logging.
+function Put-File([string]$src,[string]$dst,[string]$spec,[string]$label) {
   # Skip when the destination is not an absolute path with a valid root.
-  if (-not (Is-AbsolutePath $dst)) { Write-Host ("    Skip unresolved: {0}." -f $spec); return }
+  if (-not (Is-AbsolutePath $dst)) { Log "Skip"  $label "Unresolved live path from: $spec."; return }
   # Skip if the repo source is missing.
-  if (-not (Test-Path $src -PathType Leaf)) { Write-Host ("    Skip missing repo file: {0}." -f $src); return }
+  if (-not (Test-Path $src -PathType Leaf)) { Log "Skip"  $label "Missing repo file."; return }
   # Ensure parent directory exists.
-  New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
-  # Copy the file over the target.
+  $parent = Split-Path $dst
+  if ($parent) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
+  # Decide action based on current state.
+  $exists = Test-Path $dst -PathType Leaf
   Copy-Item $src $dst -Force
+  if ($exists) { Log "Update" $label $dst }
+  else         { Log "Create" $label $dst }
 }
 
-# Replace one directory with the repo snapshot.
-function Put-Dir([string]$src,[string]$dst,[string]$spec) {
+# Replace one directory with the repo snapshot and contextual logging.
+function Put-Dir([string]$src,[string]$dst,[string]$spec,[string]$label) {
   # Skip when the destination is not an absolute path with a valid root.
-  if (-not (Is-AbsolutePath $dst)) { Write-Host ("    Skip unresolved: {0}." -f $spec); return }
+  if (-not (Is-AbsolutePath $dst)) { Log "Skip"    $label "Unresolved live path from: $spec."; return }
   # Skip if the repo source is missing.
-  if (-not (Test-Path $src -PathType Container)) { Write-Host ("    Skip missing repo dir: {0}." -f $src); return }
-  # Remove old directory to avoid stale files.
-  if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
+  if (-not (Test-Path $src -PathType Container)) { Log "Skip" $label "Missing repo dir."; return }
   # Ensure parent directory exists.
-  New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
-  # Copy the snapshot recursively.
+  $parent = Split-Path $dst
+  if ($parent) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
+  # Decide action and perform copy.
+  $existed = Test-Path $dst -PathType Container
+  if ($existed) { Remove-Item $dst -Recurse -Force }
   Copy-Item $src $dst -Recurse -Force
+  if ($existed) { Log "Replace" $label $dst }
+  else          { Log "Create"  $label $dst }
 }
 
-# Import one .reg file as administrator.
-function Import-Reg([string]$regPath) {
+# Import one .reg file as administrator with logging.
+function Import-Reg([string]$regPath,[string]$label) {
   # Skip if the repo source is missing.
-  if (-not (Test-Path $regPath -PathType Leaf)) { Write-Host ("    Skip missing reg: {0}." -f $regPath); return }
-  # Delegate to reg.exe with elevation.
+  if (-not (Test-Path $regPath -PathType Leaf)) { Log "Skip" $label "Missing reg file."; return }
   Start-Process reg.exe -ArgumentList @("import","`"$regPath`"") -Verb RunAs -Wait
+  Log "Import" $label
 }
 
 # Execute the plan grouped by program for readable logs.
 foreach ($group in $plan | Group-Object App) {
   Write-Host "== $($group.Name) =="
-
   foreach ($it in $group.Group) {
     switch ($it.Kind) {
-      'file' {
-        Write-Host ("  File: {0}" -f $it.Label)
-        Write-Host ("    Copy to {0}." -f ($(if ($it.LivePath) { $it.LivePath } else { '<unresolved>' })))
-        Put-File $it.RepoPath $it.LivePath $it.LiveSpec
-      }
-      'dir'  {
-        Write-Host ("  Dir:  {0}" -f $it.Label)
-        Write-Host ("    Replace {0}." -f ($(if ($it.LivePath) { $it.LivePath } else { '<unresolved>' })))
-        Put-Dir $it.RepoPath $it.LivePath $it.LiveSpec
-      }
-      'reg'  {
-        Write-Host ("  Reg:  {0}" -f $it.Label)
-        Write-Host ("    Import.")
-        Import-Reg $it.RepoPath
-      }
-      'manual' {
-        Write-Host ("  Manual: {0}. Action required." -f $it.Label)
-      }
+      'file'   { Put-File $it.RepoPath $it.LivePath $it.LiveSpec $it.Label }
+      'dir'    { Put-Dir  $it.RepoPath $it.LivePath $it.LiveSpec $it.Label }
+      'reg'    { Import-Reg $it.RepoPath $it.Label }
+      'manual' { Log "Manual" $it.Label "Action required." }
     }
   }
-
   Write-Host
 }
 
