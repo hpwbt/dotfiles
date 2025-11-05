@@ -1,0 +1,96 @@
+{
+  "AutoHotkey": {
+    "files": [
+      { "live": "$env:USERPROFILE/Documents/AutoHotkey/Shortcut Manager.ahk", "backup": "AutoHotkey/Shortcut Manager.ahk" }
+    ]
+  },
+  "foobar2000": {
+    "files": [
+      { "live": "$env:APPDATA/foobar2000-v2/config.sqlite", "backup": "foobar2000/config.sqlite" },
+      { "live": "$env:APPDATA/foobar2000-v2/metadb.sqlite", "backup": "foobar2000/metadb.sqlite" },
+      { "live": "$env:APPDATA/foobar2000-v2/theme.fth", "backup": "foobar2000/theme.fth" }
+    ],
+    "dirs": [
+      { "live": "$env:APPDATA/foobar2000-v2/library-v2.0", "backup": "foobar2000/library-v2.0" },
+      { "live": "$env:APPDATA/foobar2000-v2/playlists-v2.0", "backup": "foobar2000/playlists-v2.0" }
+    ]
+  },
+  "GHelper": {
+    "files": [
+      { "live": "$env:APPDATA/GHelper/config.json", "backup": "Ghelper/config.json" }
+    ]
+  },
+  "Git": {
+    "files": [
+      { "live":"$env:USERPROFILE/.gitconfig", "backup": "Git/.gitconfig" }
+    ]
+  },
+  "GlazeWM": {
+    "files": [
+      { "live": "$env:USERPROFILE/.glzr/glazewm/config.yaml", "backup": "GlazeWM/config.yaml" }
+    ]
+  },
+  "LibreWolf": {
+    "files": [
+      { "live": "$env:LIBREWOLF/permissions.sqlite", "backup": "LibreWolf/permissions.sqlite" },
+      { "live": "$env:USERPROFILE/.librewolf/librewolf.overrides.cfg", "backup": "LibreWolf/librewolf.overrides.cfg" }
+    ],
+    "manual": [
+      "Extensions",
+      "Bookmarks",
+      "Search engine"
+    ]
+  },
+  "mpv": {
+    "files": [
+      { "live": "$env:APPDATA/mpv/mpv.conf", "backup": "mpv/mpv.conf" },
+      { "live": "$env:APPDATA/mpv/input.conf", "backup": "mpv/input.conf" }
+    ]
+  },
+  "Obsidian": {
+    "files": [
+      { "live": "$env:USERPROFILE/Documents/Notes/.obsidian.vimrc", "backup": "Obsidian/.obsidian.vimrc" }
+    ]
+  },
+  "Windows PowerShell": {
+    "files": [
+      { "live": "$env:USERPROFILE/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1", "backup": "Windows PowerShell/Microsoft.PowerShell_profile.ps1" }
+    ]
+  },
+  "Windows Registry": {
+      "reg": [
+        "Automatically Close all Background Apps on Shutdown.reg",
+        "Disable GameDVR.reg",
+        "Disable Online Tips in the Settings.reg",
+        "Disable the Lock Screen.reg",
+        "Disable Web Search in the Start Menu.reg",
+        "Give IPv4 precednece over IPv6.reg",
+        "Prevent Diagnostic Data from Being Sent.reg",
+        "Prevent Downloaded Files from Being Blocked.reg",
+        "Prevent Microsoft Edge from Running in the Background.reg",
+        "Prevent UWP Apps from Running in the Background.reg",
+        "Prevent Windows from Reducing Wallpaper Quality.reg",
+        "Prevent Windows Update from Installing Drivers.reg",
+        "Remove the Home Section in the Settings.reg",
+        "Remove the Home and Gallery Sections in Windows Explorer.reg",
+        "Remove the Recommended Section in the Start Menu.reg",
+        "Remove Thumbnail Overlays in Windows Explorer.reg",
+        "Set the Full Right-Click Menu as the Default.reg"
+      ]
+  },
+  "Windows Terminal": {
+    "files": [
+      { "live": "$env:LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json", "backup": "Windows Terminal/settings.json" }
+    ]
+  },
+  "WSL": {
+    "files": [
+      { "live": "$env:USERPROFILE/.wslgconfig", "backup": "WSL/.wlsgconfig" }
+    ]
+  },
+  "yt-dlp": {
+    "files": [
+      { "live": "$env:APPDATA/yt-dlp/config.txt", "backup": "yt-dlp/config.txt" }
+    ]
+  }
+}
