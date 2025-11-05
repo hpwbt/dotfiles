@@ -58,7 +58,7 @@
     ]
   },
   "Windows Registry": {
-      "reg": [
+      "registry": [
         "Automatically Close all Background Apps on Shutdown.reg",
         "Disable GameDVR.reg",
         "Disable Online Tips in the Settings.reg",
