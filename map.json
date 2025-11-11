@@ -1,5 +1,5 @@
 {
-  "storeRoot": "$env:USERPROFILE/.dotfiles/store",
+  "storeRoot": "$env:USERPROFILE/Dotfiles/store",
   "programs": [
     {
       "name": "AutoHotkey",
