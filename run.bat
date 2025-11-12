@@ -18,11 +18,12 @@ rem Set custom environmental variable and apply stored settings.
 powershell -NoProfile -Command ^
   "& { $ErrorActionPreference='Stop'; & '%SCRIPTS%\env.ps1'; & '%SCRIPTS%\apply.ps1' }"
 if errorlevel 1 (
+    echo(
     echo One or more steps failed. Check the output above.
 ) else (
+    echo(
     echo All steps succeeded.
 )
 
-echo Tasks finished.
 pause
 endlocal
