@@ -1,22 +1,23 @@
+# Enforce strict mode and stop on errors.
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
-# Resolve repository root based on script location.
+# Resolve repository paths.
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$RepoRoot = Split-Path $ScriptDir -Parent
-$MapPath = Join-Path $RepoRoot "map.json"
+$RepoRoot  = Split-Path $ScriptDir -Parent
+$MapPath   = Join-Path $RepoRoot "map.json"
 
-# Ensure map.json exists.
+# Require presence of the configuration file.
 if (-not (Test-Path $MapPath)) {
     throw "Map configuration file not found at: $MapPath."
 }
 
 # Prepare global tallies.
 $Totals = @{
-    Copied  = 0
-    Skipped = 0
-    Missing = 0
-    Errors  = 0
+    Succeeded = 0
+    Skipped   = 0
+    Missing   = 0
+    Failed    = 0
 }
 
 # Read and parse the map configuration.
@@ -27,7 +28,7 @@ try {
     throw "Map configuration could not be parsed: $($_.Exception.Message)."
 }
 
-# Ensure the root of the store is defined.
+# Ensure a defined root of the store.
 if (-not ($Config -and $Config.PSObject.Properties.Name -contains 'storeRoot')) {
     throw "Map configuration lacks a defined store root."
 }
@@ -35,7 +36,7 @@ if (-not ($Config.storeRoot -is [string]) -or [string]::IsNullOrWhiteSpace($Conf
     throw "Store root must be a non-empty text value."
 }
 
-# Ensure the list of program entries is present.
+# Ensure a list of program entries.
 if (-not ($Config.PSObject.Properties.Name -contains 'programs')) {
     throw "Map configuration is missing a list of program entries."
 }
@@ -54,74 +55,62 @@ for ($i = 0; $i -lt $Programs.Count; $i++) {
 
     if ($p.PSObject.Properties.Name -contains 'files') {
         if (-not ($p.files -is [System.Collections.IEnumerable])) { throw "File mappings must be provided as a list." }
-        $fi = 0
         foreach ($f in $p.files) {
             if (-not ($f -is [psobject])) { throw "File mapping must be an object." }
             if (-not ($f.PSObject.Properties.Name -contains 'live')) { throw "File mapping lacks a live path." }
             if (-not ($f.PSObject.Properties.Name -contains 'store')) { throw "File mapping lacks a store path." }
-            if (-not ($f.live -is [string]) -or [string]::IsNullOrWhiteSpace($f.live)) { throw "File live path must be a non-empty text value." }
-            if (-not ($f.store -is [string]) -or [string]::IsNullOrWhiteSpace($f.store)) { throw "File store path must be a non-empty text value." }
-            $fi++
+            if (-not ($f.live -is [string]) -or [string]::IsNullOrWhiteSpace($f.live)) { throw "Live path must be a non-empty text value." }
+            if (-not ($f.store -is [string]) -or [string]::IsNullOrWhiteSpace($f.store)) { throw "Store path must be a non-empty text value." }
         }
     }
 
     if ($p.PSObject.Properties.Name -contains 'directories') {
         if (-not ($p.directories -is [System.Collections.IEnumerable])) { throw "Directory mappings must be provided as a list." }
-        $di = 0
         foreach ($d in $p.directories) {
             if (-not ($d -is [psobject])) { throw "Directory mapping must be an object." }
             if (-not ($d.PSObject.Properties.Name -contains 'live')) { throw "Directory mapping lacks a live path." }
             if (-not ($d.PSObject.Properties.Name -contains 'store')) { throw "Directory mapping lacks a store path." }
-            if (-not ($d.live -is [string]) -or [string]::IsNullOrWhiteSpace($d.live)) { throw "Directory live path must be a non-empty text value." }
-            if (-not ($d.store -is [string]) -or [string]::IsNullOrWhiteSpace($d.store)) { throw "Directory store path must be a non-empty text value." }
-            $di++
+            if (-not ($d.live -is [string]) -or [string]::IsNullOrWhiteSpace($d.live)) { throw "Live path must be a non-empty text value." }
+            if (-not ($d.store -is [string]) -or [string]::IsNullOrWhiteSpace($d.store)) { throw "Store path must be a non-empty text value." }
         }
     }
 
     if ($p.PSObject.Properties.Name -contains 'manual') {
         if (-not ($p.manual -is [System.Collections.IEnumerable])) { throw "Manual checklist must be provided as a list." }
-        $mi = 0
         foreach ($m in $p.manual) {
             if (-not ($m -is [string]) -or [string]::IsNullOrWhiteSpace($m)) { throw "Manual checklist item must be a non-empty text value." }
-            $mi++
         }
     }
 
     if ($p.PSObject.Properties.Name -contains 'registryFiles') {
         if (-not ($p.registryFiles -is [System.Collections.IEnumerable])) { throw "Registry file list must be provided as a list." }
-        $ri = 0
         foreach ($r in $p.registryFiles) {
             if (-not ($r -is [string]) -or [string]::IsNullOrWhiteSpace($r)) { throw "Registry file entry must be a non-empty text value." }
             if (-not ($r.ToString().ToLowerInvariant().EndsWith('.reg'))) { throw "Registry file entry must end with .reg." }
-            $ri++
         }
     }
 }
-
-# Expose validated values for later components.
-$StoreRootRaw = [string]$Config.storeRoot
-$Programs     = @($Config.programs)
 
 # Expand $env: tokens, failing on unknown names.
 function Expand-EnvTokens {
     param([Parameter(Mandatory=$true)][string]$Text)
     $pattern = '(?i)\$env:([A-Za-z0-9_]+)'
-    return ([System.Text.RegularExpressions.Regex]::Replace($Text, $pattern, {
+    [System.Text.RegularExpressions.Regex]::Replace($Text, $pattern, {
         param($m)
         $name = $m.Groups[1].Value
         $val = [Environment]::GetEnvironmentVariable($name)
         if ($null -eq $val) {
             throw "Unknown environment variable: $name."
         }
-        return $val
-    }))
+        $val
+    })
 }
 
-# Normalize slashes and collapse path segments.
+# Normalize slashes and resolve to a full path.
 function Normalize-Path {
     param([Parameter(Mandatory=$true)][string]$Text)
     $p = $Text -replace '/', '\'
-    return [System.IO.Path]::GetFullPath($p)
+    [System.IO.Path]::GetFullPath($p)
 }
 
 # Resolve a path inside the program’s store folder and block traversal.
@@ -135,11 +124,11 @@ function Resolve-StorePath {
     if (-not $combined.StartsWith($ProgramStoreRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "Store path escapes the program’s store folder: $RelativePath."
     }
-    return $combined
+    $combined
 }
 
 # Expand and normalize the store root.
-$StoreRoot = Normalize-Path (Expand-EnvTokens -Text $StoreRootRaw)
+$StoreRoot = Normalize-Path (Expand-EnvTokens -Text ([string]$Config.storeRoot))
 
 # Prepare program contexts with computed store folders.
 $ProgramContexts = foreach ($p in $Programs) {
@@ -157,7 +146,7 @@ function Test-IsElevated {
     try {
         $id  = [System.Security.Principal.WindowsIdentity]::GetCurrent()
         $pri = New-Object System.Security.Principal.WindowsPrincipal($id)
-        return $pri.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+        $pri.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
     } catch {
         throw "Failed to determine elevation state: $($_.Exception.Message)."
     }
@@ -199,7 +188,7 @@ function Compare-Files {
     if (-not (Test-Path -LiteralPath $A) -or -not (Test-Path -LiteralPath $B)) { return $false }
     $fa = Get-Item -LiteralPath $A -Force
     $fb = Get-Item -LiteralPath $B -Force
-    return ($fa.Length -eq $fb.Length) -and ($fa.LastWriteTimeUtc -eq $fb.LastWriteTimeUtc)
+    ($fa.Length -eq $fb.Length) -and ($fa.LastWriteTimeUtc -eq $fb.LastWriteTimeUtc)
 }
 
 # Copy a single file with skip and overwrite logic.
@@ -223,9 +212,9 @@ function Copy-File {
         }
 
         Copy-Item -LiteralPath $Src -Destination $Dst -Force
-        return [pscustomobject]@{ Status='copied'; Src=$Src; Dst=$Dst; Message=$null }
+        [pscustomobject]@{ Status='succeeded'; Src=$Src; Dst=$Dst; Message=$null }
     } catch {
-        return [pscustomobject]@{ Status='error'; Src=$Src; Dst=$Dst; Message=$_.Exception.Message }
+        [pscustomobject]@{ Status='failed'; Src=$Src; Dst=$Dst; Message=$_.Exception.Message }
     }
 }
 
@@ -257,10 +246,10 @@ function Copy-Directory {
             $results.Add($res) | Out-Null
         }
     } catch {
-        $results.Add([pscustomobject]@{ Status='error'; Src=$Src; Dst=$Dst; Message=$_.Exception.Message }) | Out-Null
+        $results.Add([pscustomobject]@{ Status='failed'; Src=$Src; Dst=$Dst; Message=$_.Exception.Message }) | Out-Null
     }
 
-    return [pscustomobject]@{ Results = $results }
+    [pscustomobject]@{ Results = $results }
 }
 
 # Import a registry file using the system tool.
@@ -284,12 +273,12 @@ function Import-RegFile {
         $proc.WaitForExit()
 
         if ($proc.ExitCode -eq 0) {
-            return [pscustomobject]@{ Status='imported'; File=$Path; Message=$null }
+            [pscustomobject]@{ Status='imported'; File=$Path; Message=$null }
         } else {
-            return [pscustomobject]@{ Status='failed'; File=$Path; Message=("Exit code {0}." -f $proc.ExitCode) }
+            [pscustomobject]@{ Status='failed'; File=$Path; Message=("Exit code {0}." -f $proc.ExitCode) }
         }
     } catch {
-        return [pscustomobject]@{ Status='failed'; File=$Path; Message=$_.Exception.Message }
+        [pscustomobject]@{ Status='failed'; File=$Path; Message=$_.Exception.Message }
     }
 }
 
@@ -302,12 +291,10 @@ foreach ($ctx in $ProgramContexts) {
     Write-Host ""
     Write-Host $name
 
-    $pCopied = 0
-    $pSkipped = 0
-    $pMissing = 0
-    $pErrors = 0
-    $pRegImported = 0
-    $pRegFailed = 0
+    $pSucceeded = 0
+    $pSkipped   = 0
+    $pMissing   = 0
+    $pFailed    = 0
 
     # Apply file mappings.
     if ($p.PSObject.Properties.Name -contains 'files' -and $p.files) {
@@ -317,33 +304,33 @@ foreach ($ctx in $ProgramContexts) {
                 $dst = Normalize-Path (Expand-EnvTokens -Text $f.live)
 
                 if (-not (Test-Path -LiteralPath $src)) {
-                    Write-Host ("MISSING {0}" -f $src)
+                    Write-Host ("Missing {0}" -f $src)
                     $pMissing++; continue
                 }
 
                 $res = Copy-File -Src $src -Dst $dst
                 switch ($res.Status) {
-                    'copied' {
-                        Write-Host ("COPIED  {0} -> {1}" -f $res.Src, $res.Dst)
-                        $pCopied++
+                    'succeeded' {
+                        Write-Host ("Succeeded  {0} -> {1}" -f $res.Src, $res.Dst)
+                        $pSucceeded++
                     }
                     'skipped' {
-                        Write-Host ("SKIPPED {0}" -f $res.Dst)
+                        Write-Host ("Skipped {0}" -f $res.Dst)
                         $pSkipped++
                     }
                     'missing' {
-                        Write-Host ("MISSING {0}" -f $res.Src)
+                        Write-Host ("Missing {0}" -f $res.Src)
                         $pMissing++
                     }
-                    'error' {
+                    'failed' {
                         $errPath = if ($res.Dst) { $res.Dst } else { $res.Src }
-                        Write-Host ("ERROR   {0}: {1}" -f $errPath, $res.Message)
-                        $pErrors++
+                        Write-Host ("Failed   {0}: {1}" -f $errPath, $res.Message)
+                        $pFailed++
                     }
                 }
             } catch {
-                Write-Host ("ERROR   {0}: {1}" -f $f.live, $_.Exception.Message)
-                $pErrors++
+                Write-Host ("Failed   {0}: {1}" -f $f.live, $_.Exception.Message)
+                $pFailed++
             }
         }
     }
@@ -356,95 +343,98 @@ foreach ($ctx in $ProgramContexts) {
                 $dstDir = Normalize-Path (Expand-EnvTokens -Text $d.live)
 
                 if (-not (Test-Path -LiteralPath $srcDir)) {
-                    Write-Host ("MISSING {0}" -f $srcDir)
+                    Write-Host ("Missing {0}" -f $srcDir)
                     $pMissing++; continue
                 }
 
                 $dirRes = Copy-Directory -Src $srcDir -Dst $dstDir
                 foreach ($r in $dirRes.Results) {
                     switch ($r.Status) {
-                        'copied' {
-                            Write-Host ("COPIED  {0} -> {1}" -f $r.Src, $r.Dst)
-                            $pCopied++
+                        'succeeded' {
+                            Write-Host ("Succeeded  {0} -> {1}" -f $r.Src, $r.Dst)
+                            $pSucceeded++
                         }
                         'skipped' {
-                            Write-Host ("SKIPPED {0}" -f $r.Dst)
+                            Write-Host ("Skipped {0}" -f $r.Dst)
                             $pSkipped++
                         }
                         'missing' {
-                            Write-Host ("MISSING {0}" -f $r.Src)
+                            Write-Host ("Missing {0}" -f $r.Src)
                             $pMissing++
                         }
-                        'error' {
+                        'failed' {
                             $errPath = if ($r.Dst) { $r.Dst } else { $r.Src }
-                            Write-Host ("ERROR   {0}: {1}" -f $errPath, $r.Message)
-                            $pErrors++
+                            Write-Host ("Failed   {0}: {1}" -f $errPath, $r.Message)
+                            $pFailed++
                         }
                     }
                 }
             } catch {
-                Write-Host ("ERROR   {0}: {1}" -f $d.live, $_.Exception.Message)
-                $pErrors++
+                Write-Host ("Failed   {0}: {1}" -f $d.live, $_.Exception.Message)
+                $pFailed++
             }
         }
     }
 
-    # Apply registry imports if elevated.
+    # Apply registry imports with unified reporting.
     if ($p.PSObject.Properties.Name -contains 'registryFiles' -and $p.registryFiles) {
         if (-not $IsElevated) {
-            Write-Host "Registry skipped (not elevated)."
-            $pSkipped++
+            foreach ($rf in $p.registryFiles) {
+                try {
+                    $regPath = Resolve-StorePath -ProgramStoreRoot $programStoreRoot -RelativePath $rf
+                    Write-Host ("Skipped {0}" -f $regPath)
+                    $pSkipped++
+                } catch {
+                    Write-Host ("Failed   {0}: {1}" -f $rf, $_.Exception.Message)
+                    $pFailed++
+                }
+            }
         } else {
             foreach ($rf in $p.registryFiles) {
                 try {
                     if (-not ($rf.ToString().ToLowerInvariant().EndsWith('.reg'))) {
-                        Write-Host ("REG FAILED   {0}: {1}" -f $rf, "File must end with .reg.")
-                        $pRegFailed++; $pErrors++; continue
+                        Write-Host ("Failed   {0}: {1}" -f $rf, "File must end with .reg.")
+                        $pFailed++; continue
                     }
                     $regPath = Resolve-StorePath -ProgramStoreRoot $programStoreRoot -RelativePath $rf
                     $res = Import-RegFile -Path $regPath
                     if ($res.Status -eq 'imported') {
-                        Write-Host ("REG IMPORTED {0}" -f $regPath)
-                        $pRegImported++; $pCopied++
+                        Write-Host ("Succeeded  {0}" -f $regPath)
+                        $pSucceeded++
                     } else {
-                        Write-Host ("REG FAILED   {0}: {1}" -f $regPath, $res.Message)
-                        $pRegFailed++
-                        if ($res.Message -match 'not found') { $pMissing++ } else { $pErrors++ }
+                        Write-Host ("Failed   {0}: {1}" -f $regPath, $res.Message)
+                        if ($res.Message -match 'not found') { $pMissing++ } else { $pFailed++ }
                     }
                 } catch {
-                    Write-Host ("REG FAILED   {0}: {1}" -f $rf, $_.Exception.Message)
-                    $pRegFailed++; $pErrors++
+                    Write-Host ("Failed   {0}: {1}" -f $rf, $_.Exception.Message)
+                    $pFailed++
                 }
             }
         }
     }
 
-    # Print manual checklist if present.
+    # Print manual checklist items for follow-up.
     if ($p.PSObject.Properties.Name -contains 'manual' -and $p.manual) {
         foreach ($m in $p.manual) {
             Write-Host ("- {0}" -f $m)
         }
     }
 
-    # Program summary and global tally.
-    Write-Host ("Summary: copied={0} skipped={1} missing={2} errors={3} reg: imported={4} failed={5}" -f `
-        $pCopied, $pSkipped, $pMissing, $pErrors, $pRegImported, $pRegFailed)
+    # Report per-program summary and update global totals.
+    Write-Host ("Summary: succeeded={0} skipped={1} missing={2} failed={3}" -f `
+        $pSucceeded, $pSkipped, $pMissing, $pFailed)
 
-    $Totals.Copied  += $pCopied
-    $Totals.Skipped += $pSkipped
-    $Totals.Missing += $pMissing
-    $Totals.Errors  += $pErrors
+    $Totals.Succeeded += $pSucceeded
+    $Totals.Skipped   += $pSkipped
+    $Totals.Missing   += $pMissing
+    $Totals.Failed    += $pFailed
 }
 
-# Print overall results and set exit status.
+# Print overall results and exit with appropriate status.
 Write-Host ""
-Write-Host ("Copied={0}"  -f $Totals.Copied)
-Write-Host ("Skipped={0}" -f $Totals.Skipped)
-Write-Host ("Missing={0}" -f $Totals.Missing)
-Write-Host ("Errors={0}"  -f $Totals.Errors)
+Write-Host ("Succeeded={0}" -f $Totals.Succeeded)
+Write-Host ("Skipped={0}"   -f $Totals.Skipped)
+Write-Host ("Missing={0}"   -f $Totals.Missing)
+Write-Host ("Failed={0}"    -f $Totals.Failed)
 
-if ($Totals.Errors -eq 0) {
-    exit 0
-} else {
-    exit 1
-}
+if ($Totals.Failed -eq 0) { exit 0 } else { exit 1 }
