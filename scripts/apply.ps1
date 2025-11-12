@@ -7,6 +7,17 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $RepoRoot  = Split-Path $ScriptDir -Parent
 $MapPath   = Join-Path $RepoRoot "map.json"
 
+$ExpectedStorePath = Join-Path $env:USERPROFILE 'Dotfiles'
+if (-not (Test-Path -LiteralPath $ExpectedPath)) {
+    Write-Host ""
+    Write-Host "Dotfiles directory not found at:" -ForegroundColor Yellow
+    Write-Host "$ExpectedStorePath"
+    Write-Host "Rename current directory and move it to the expected path."
+    Write-Host ""
+    exit 1
+}
+
+
 # Require presence of the configuration file.
 if (-not (Test-Path $MapPath)) {
     throw "Map configuration file not found at: $MapPath."
