@@ -1,4 +1,3 @@
-# Enforce strict mode and stop on errors.
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
@@ -9,9 +8,7 @@ $MapPath   = Join-Path $RepoRoot "map.json"
 
 $ExpectedStorePath = Join-Path $env:USERPROFILE 'Dotfiles'
 if (-not (Test-Path -LiteralPath $ExpectedStorePath)) {
-    Write-Host ""
-    Write-Host "Dotfiles directory not found at:" -ForegroundColor Yellow
-    Write-Host "$ExpectedStorePath"
+    Write-Host "`nDotfiles directory not found at: $ExpectedStorePath" -ForegroundColor Yellow
     Write-Host "Rename current directory and move it to the expected path."
     exit 1
 }
@@ -19,7 +16,7 @@ if (-not (Test-Path -LiteralPath $ExpectedStorePath)) {
 
 # Require presence of the configuration file.
 if (-not (Test-Path $MapPath)) {
-    throw "Map configuration file not found at: $MapPath."
+    throw "Map configuration file not found at: $MapPath"
 }
 
 # Prepare global tallies.
@@ -35,7 +32,7 @@ $ConfigJson = Get-Content -LiteralPath $MapPath -Raw -Encoding UTF8
 try {
     $Config = $ConfigJson | ConvertFrom-Json -ErrorAction Stop
 } catch {
-    throw "Map configuration could not be parsed: $($_.Exception.Message)."
+    throw "Map configuration could not be parsed."
 }
 
 # Ensure a defined root of the store.
@@ -101,7 +98,7 @@ for ($i = 0; $i -lt $Programs.Count; $i++) {
     }
 }
 
-# Expand $env: tokens, failing on unknown names.
+# Expand tokens, failing on unknown ones.
 function Expand-EnvTokens {
     param([Parameter(Mandatory=$true)][string]$Text)
     $pattern = '(?i)\$env:([A-Za-z0-9_]+)'
@@ -110,7 +107,7 @@ function Expand-EnvTokens {
         $name = $m.Groups[1].Value
         $val = [Environment]::GetEnvironmentVariable($name)
         if ($null -eq $val) {
-            throw "Unknown environment variable: $name."
+            throw "Unknown environment variable: $name"
         }
         $val
     })
@@ -132,7 +129,7 @@ function Resolve-StorePath {
     $rel = $RelativePath -replace '/', '\'
     $combined = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($ProgramStoreRoot, $rel))
     if (-not $combined.StartsWith($ProgramStoreRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw "Store path escapes the program’s store folder: $RelativePath."
+        throw "Store path escapes the program’s store folder: $RelativePath"
     }
     $combined
 }
@@ -158,7 +155,7 @@ function Test-IsElevated {
         $pri = New-Object System.Security.Principal.WindowsPrincipal($id)
         $pri.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
     } catch {
-        throw "Failed to determine elevation state: $($_.Exception.Message)."
+        throw "Failed to determine elevation state."
     }
 }
 
@@ -185,7 +182,7 @@ function Clear-ReadOnly {
             [System.IO.File]::SetAttributes($Path, $attrs -bxor [System.IO.FileAttributes]::ReadOnly)
         }
     } catch {
-        throw "Failed to clear read-only attribute: $($_.Exception.Message)."
+        throw "Failed to clear read-only attribute."
     }
 }
 
@@ -298,8 +295,7 @@ foreach ($ctx in $ProgramContexts) {
     $name = $ctx.Name
     $programStoreRoot = $ctx.ProgramStoreRoot
 
-    Write-Host ""
-    Write-Host $name
+    Write-Host "`n$name"
 
     $pSucceeded = 0
     $pSkipped   = 0
@@ -321,7 +317,7 @@ foreach ($ctx in $ProgramContexts) {
                 $res = Copy-File -Src $src -Dst $dst
                 switch ($res.Status) {
                     'succeeded' {
-                        Write-Host ("Succeeded  {0} -> {1}" -f $res.Src, $res.Dst)
+                        Write-Host ("Succeeded {0} -> {1}" -f $res.Src, $res.Dst)
                         $pSucceeded++
                     }
                     'skipped' {
@@ -334,12 +330,12 @@ foreach ($ctx in $ProgramContexts) {
                     }
                     'failed' {
                         $errPath = if ($res.Dst) { $res.Dst } else { $res.Src }
-                        Write-Host ("Failed   {0}: {1}" -f $errPath, $res.Message)
+                        Write-Host ("Failed {0}: {1}" -f $errPath, $res.Message)
                         $pFailed++
                     }
                 }
             } catch {
-                Write-Host ("Failed   {0}: {1}" -f $f.live, $_.Exception.Message)
+                Write-Host ("Failed {0}: {1}" -f $f.live, $_.Exception.Message)
                 $pFailed++
             }
         }
@@ -361,7 +357,7 @@ foreach ($ctx in $ProgramContexts) {
                 foreach ($r in $dirRes.Results) {
                     switch ($r.Status) {
                         'succeeded' {
-                            Write-Host ("Succeeded  {0} -> {1}" -f $r.Src, $r.Dst)
+                            Write-Host ("Succeeded {0} -> {1}" -f $r.Src, $r.Dst)
                             $pSucceeded++
                         }
                         'skipped' {
@@ -374,13 +370,13 @@ foreach ($ctx in $ProgramContexts) {
                         }
                         'failed' {
                             $errPath = if ($r.Dst) { $r.Dst } else { $r.Src }
-                            Write-Host ("Failed   {0}: {1}" -f $errPath, $r.Message)
+                            Write-Host ("Failed {0}: {1}" -f $errPath, $r.Message)
                             $pFailed++
                         }
                     }
                 }
             } catch {
-                Write-Host ("Failed   {0}: {1}" -f $d.live, $_.Exception.Message)
+                Write-Host ("Failed {0}: {1}" -f $d.live, $_.Exception.Message)
                 $pFailed++
             }
         }
@@ -395,7 +391,7 @@ foreach ($ctx in $ProgramContexts) {
                     Write-Host ("Skipped {0}" -f $regPath)
                     $pSkipped++
                 } catch {
-                    Write-Host ("Failed   {0}: {1}" -f $rf, $_.Exception.Message)
+                    Write-Host ("Failed {0}: {1}" -f $rf, $_.Exception.Message)
                     $pFailed++
                 }
             }
@@ -403,20 +399,20 @@ foreach ($ctx in $ProgramContexts) {
             foreach ($rf in $p.registryFiles) {
                 try {
                     if (-not ($rf.ToString().ToLowerInvariant().EndsWith('.reg'))) {
-                        Write-Host ("Failed   {0}: {1}" -f $rf, "File must end with .reg.")
+                        Write-Host ("Failed {0}: {1}" -f $rf, "File must end with .reg.")
                         $pFailed++; continue
                     }
                     $regPath = Resolve-StorePath -ProgramStoreRoot $programStoreRoot -RelativePath $rf
                     $res = Import-RegFile -Path $regPath
                     if ($res.Status -eq 'imported') {
-                        Write-Host ("Succeeded  {0}" -f $regPath)
+                        Write-Host ("Succeeded {0}" -f $regPath)
                         $pSucceeded++
                     } else {
-                        Write-Host ("Failed   {0}: {1}" -f $regPath, $res.Message)
+                        Write-Host ("Failed {0}: {1}" -f $regPath, $res.Message)
                         if ($res.Message -match 'not found') { $pMissing++ } else { $pFailed++ }
                     }
                 } catch {
-                    Write-Host ("Failed   {0}: {1}" -f $rf, $_.Exception.Message)
+                    Write-Host ("Failed {0}: {1}" -f $rf, $_.Exception.Message)
                     $pFailed++
                 }
             }

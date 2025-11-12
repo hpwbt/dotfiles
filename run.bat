@@ -15,12 +15,12 @@ rem Execution policy
 powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force"
 
 rem Set custom environmental variable and apply stored settings.
-powershell -NoProfile -Command ^
-  "& { $ErrorActionPreference='Stop'; & '%SCRIPTS%\env.ps1'; & '%SCRIPTS%\apply.ps1' }"
+powershell -NoProfile -Command ^ "& { $ErrorActionPreference='Stop'; & '%SCRIPTS%\env.ps1'; & '%SCRIPTS%\apply.ps1' }"
+
 if errorlevel 1 (
-    powershell -NoProfile -Command "Write-Host ''; Write-Host 'One or more steps failed. Check the output above.' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host \"`nOne or more steps failed. Check the output above.\" -ForegroundColor Red"
 ) else (
-    powershell -NoProfile -Command "Write-Host ''; Write-Host 'All steps succeeded.' -ForegroundColor Green"
+    powershell -NoProfile -Command "Write-Host \"`nAll steps succeeded.\" -ForegroundColor Green"
 )
 
 pause
