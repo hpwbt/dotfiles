@@ -22,4 +22,3 @@ Write-Host "Environmental variable successfully set:" -ForegroundColor Green
 Get-ChildItem Env: | Where-Object { $_.Name -in 'LIBREPROFILE' } | ForEach-Object {
     Write-Host ("$($_.Name) = `"$($_.Value)`"")
 }
-Write-Host ""
