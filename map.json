@@ -14,7 +14,7 @@
         { "live": "$env:APPDATA/foobar2000/metadb.sqlite", "store": "metadb.sqlite" },
         { "live": "$env:APPDATA/foobar2000/theme.fth", "store": "theme.fth" }
       ],
-      "dirs": [
+      "directories": [
         { "live": "$env:APPDATA/foobar2000/library-v2.0", "store": "library-v2.0" },
         { "live": "$env:APPDATA/foobar2000/playlists-v2.0", "store": "playlists-v2.0" }
       ]
@@ -70,24 +70,24 @@
     },
     {
       "name": "Windows Registry",
-      "registry": [
-        "Automatically Close all Background Apps on Shutdown",
-        "Disable GameDVR",
-        "Disable Online Tips in Settings",
-        "Disable the Lock Screen",
-        "Disable Web Search in the Start Menu",
-        "Give IPv4 precedence over IPv6",
-        "Prevent Diagnostic Data from Being Sent",
-        "Prevent Downloaded Files from Being Blocked",
-        "Prevent Microsoft Edge from Running in the Background",
-        "Prevent UWP Apps from Running in the Background",
-        "Prevent Windows from Reducing Wallpaper Quality",
-        "Prevent Windows Update from Installing Drivers",
-        "Remove the Home and Gallery Sections in Windows Explorer",
-        "Remove the Home Section in Settings",
-        "Remove the Recommended Section in the Start Menu",
-        "Remove Thumbnail Overlays in Windows Explorer",
-        "Set the Full Right-Click Menu as the Default"
+      "registryFiles": [
+        "Automatically Close all Background Apps on Shutdown.reg",
+        "Disable GameDVR.reg",
+        "Disable Online Tips in Settings.reg",
+        "Disable the Lock Screen.reg",
+        "Disable Web Search in the Start Menu.reg",
+        "Give IPv4 precedence over IPv6.reg",
+        "Prevent Diagnostic Data from Being Sent.reg",
+        "Prevent Downloaded Files from Being Blocked.reg",
+        "Prevent Microsoft Edge from Running in the Background.reg",
+        "Prevent UWP Apps from Running in the Background.reg",
+        "Prevent Windows from Reducing Wallpaper Quality.reg",
+        "Prevent Windows Update from Installing Drivers.reg",
+        "Remove the Home and Gallery Sections in Windows Explorer.reg",
+        "Remove the Home Section in Settings.reg",
+        "Remove the Recommended Section in the Start Menu.reg",
+        "Remove Thumbnail Overlays in Windows Explorer.reg",
+        "Set the Full Right-Click Menu as the Default.reg"
       ]
     },
     {
