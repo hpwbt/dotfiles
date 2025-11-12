@@ -31,6 +31,7 @@ if errorlevel 1 (
     echo All steps succeeded.
 )
 
+echo(
 echo Tasks finished.
 pause
 endlocal
