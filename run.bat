@@ -18,11 +18,9 @@ rem Set custom environmental variable and apply stored settings.
 powershell -NoProfile -Command ^
   "& { $ErrorActionPreference='Stop'; & '%SCRIPTS%\env.ps1'; & '%SCRIPTS%\apply.ps1' }"
 if errorlevel 1 (
-    echo(
-    echo One or more steps failed. Check the output above.
+    powershell -NoProfile -Command "Write-Host ''; Write-Host 'One or more steps failed. Check the output above.' -ForegroundColor Red"
 ) else (
-    echo(
-    echo All steps succeeded.
+    powershell -NoProfile -Command "Write-Host ''; Write-Host 'All steps succeeded.' -ForegroundColor Green"
 )
 
 pause
