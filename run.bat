@@ -11,27 +11,18 @@ chcp 65001 >nul
 <nul set /p ="| |/ / (_) | |_ / , . \.___/ /" & echo.
 <nul set /p ="|___/ \___/ \__|\/|_|\/\____/ " & echo.
 
-rem Set the execution policy for the current user to "bypass".
+rem Execution policy
 powershell -NoProfile -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force"
 
-rem Set custom environmental variable.
-powershell -NoProfile -File "%SCRIPTS%\env.ps1"
+rem Set custom environmental variable and apply stored settings.
+powershell -NoProfile -Command ^
+  "& { $ErrorActionPreference='Stop'; & '%SCRIPTS%\env.ps1'; & '%SCRIPTS%\apply.ps1' }"
 if errorlevel 1 (
-    echo Could not set custom environmental variables.
-    <nul set /p ="Press any key to quit . . . "
-    pause >nul
-    exit /b 1
-)
-
-rem Apply stored settings.
-powershell -NoProfile -File "%SCRIPTS%\apply.ps1"
-if errorlevel 1 (
-    echo(
     echo One or more steps failed. Check the output above.
 ) else (
-    echo(
     echo All steps succeeded.
 )
 
+echo Tasks finished.
 pause
 endlocal
