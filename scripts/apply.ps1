@@ -145,8 +145,8 @@ $ProgramContexts = foreach ($p in $Programs) {
     $progStoreRoot = [System.IO.Path]::Combine($StoreRoot, ($p.name -replace '/', '\'))
     $progStoreRootFull = [System.IO.Path]::GetFullPath($progStoreRoot)
     [pscustomobject]@{
-        Name             = $p.name
         Spec             = $p
+        Name             = $p.name
         ProgramStoreRoot = $progStoreRootFull
     }
 }
