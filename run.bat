@@ -26,8 +26,10 @@ if errorlevel 1 (
 rem Apply stored settings.
 powershell -NoProfile -File "%SCRIPTS%\apply.ps1"
 if errorlevel 1 (
+    echo(
     echo One or more steps failed. Check the output above.
 ) else (
+    echo(
     echo All steps succeeded.
 )
 
