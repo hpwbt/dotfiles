@@ -8,7 +8,7 @@ $RepoRoot  = Split-Path $ScriptDir -Parent
 $MapPath   = Join-Path $RepoRoot "map.json"
 
 $ExpectedStorePath = Join-Path $env:USERPROFILE 'Dotfiles'
-if (-not (Test-Path -LiteralPath $ExpectedPath)) {
+if (-not (Test-Path -LiteralPath $ExpectedStorePath)) {
     Write-Host ""
     Write-Host "Dotfiles directory not found at:" -ForegroundColor Yellow
     Write-Host "$ExpectedStorePath"
